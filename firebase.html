@@ -1,0 +1,54 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  </head>
+  <body>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+      import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+      
+      const firebaseConfig = {
+        apiKey: "AIzaSyDQKcYxth9u2D62RK0v49XLePFR6V9KAU0",
+        authDomain: "cinestar-3771b.firebaseapp.com",
+        projectId: "cinestar-3771b",
+        storageBucket: "cinestar-3771b.firebasestorage.app",
+        messagingSenderId: "7034664741",
+        appId: "1:7034664741:web:c927862184fd892eb90ccc"
+    };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const setPeliculas = async() =>{
+        const data = await fetch('https://oaemdl.es/cinestar_sweb_php/peliculas')
+        const peliculas = await data.json()
+        peliculas.data.forEach(pelicula => {
+          addDoc(collection(db,'peliculas'), pelicula)
+        })
+      }
+
+      const setCines = async() =>{
+        const data = await fetch('https://oaemdl.es/cinestar_sweb_php/cines')
+        const cines = await data.json()
+        cines.data.forEach(async cine => {
+          const dataTarifas = await fetch( 'https://oaemdl.es/cinestar_sweb_php/cines/${cine.id}/tarifas')
+          cine.tarifas = (await dataTarifas.json()).data
+
+          const dataPeliculas = await fetch( 'https://oaemdl.es/cinestar_sweb_php/cines/${cine.id}/peliculas')
+          cine.peliculas = (await dataPeliculas.json()).data
+
+          await addDoc(collection(db,'cines'), cine)
+        })
+
+      }
+
+      //setPeliculas()
+      setCines()
+
+    </script>
+
+  </body>
+</html>
